@@ -1,1 +1,33 @@
-
+# fluentcompute/data/specs/nvidia_specs.json
+{
+  "bandwidth_map": {
+    "RTX 4090": 1008.0, "RTX 4080": 716.8, "RTX 4070 Ti SUPER": 672.3, "RTX 4070 Ti": 504.2, "RTX 4070 SUPER": 716.8, "RTX 4070": 504.2,
+    "RTX 3090 Ti": 1008.0, "RTX 3090": 936.2, "RTX 3080 Ti": 912.4, "RTX 3080": 760.3, "RTX 3070 Ti": 608.3, "RTX 3070": 448.0,
+    "A100": 1555.0, "H100 SXM": 3350.0, "H100 PCIe": 2000.0, "V100": 900.0, "T4": 320.0, "A10G": 600.0, "A10": 600.0, "A40": 696.0, "A6000": 768.0,
+    "NVIDIA RTX 6000 Ada Generation": 960.0, "NVIDIA RTX A6000": 768.0
+  },
+  "cuda_cores_map": {
+    "RTX 4090": 16384, "RTX 4080 SUPER": 10240, "RTX 4080": 9728, "RTX 4070 Ti SUPER": 8448, "RTX 4070 Ti": 7680, "RTX 4070 SUPER": 7168, "RTX 4070": 5888, "RTX 4060 Ti": 4352, "RTX 4060": 3072,
+    "RTX 3090 Ti": 10752, "RTX 3090": 10496, "RTX 3080 Ti": 10240, "RTX 3080": 8704,
+    "RTX 3070 Ti": 6144, "RTX 3070": 5888, "RTX 3060 Ti": 4864, "RTX 3060": 3584,
+    "NVIDIA A100": 6912, "NVIDIA H100": 14592, "Tesla V100": 5120, "Tesla T4": 2560, "A10G": 9728, "NVIDIA A10": 9216, "NVIDIA A40": 10752, "NVIDIA RTX A6000": 10752,
+    "NVIDIA RTX 6000 Ada Generation": 18176, "NVIDIA RTX 5000 Ada Generation": 12800, "NVIDIA RTX 4000 Ada Generation": 6144
+  },
+  "rt_cores_map": {
+    "RTX 4090": 128, "RTX 4080": 76, "RTX 4070 Ti": 60, "RTX 4070": 46,
+    "RTX 3090": 82, "RTX 3080": 68, "RTX 3070": 46,
+    "NVIDIA A40": 84, "NVIDIA RTX A6000": 84, "NVIDIA RTX 6000 Ada Generation": 142
+  },
+  "tensor_cores_map": {
+    "RTX 4090": 512, "RTX 4080": 304, "RTX 4070 Ti": 240, "RTX 4070": 184,
+    "RTX 3090": 328, "RTX 3080": 272, "RTX 3070": 184,
+    "NVIDIA A100": 432, "NVIDIA H100": 456, "Tesla V100": 640,
+    "Tesla T4": 320,
+    "NVIDIA A40": 336, "NVIDIA RTX A6000": 336, "NVIDIA RTX 6000 Ada Generation": 568
+  },
+  "virtualization_keywords": {
+      "vgpu_cards": ["A100", "H100", "A40", "A30", "A16", "A10", "A2", "RTX A6000", "RTX A5000", "RTX A4000", "RTX 6000 Ada Generation", "RTX 5000 Ada Generation", "RTX 4000 Ada Generation", "L40", "L4"],
+      "tesla_prefixes": ["TESLA M", "TESLA P", "TESLA V"],
+      "grid_keyword": "GRID"
+  }
+}
