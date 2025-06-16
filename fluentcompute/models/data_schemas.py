@@ -1,8 +1,50 @@
+# fluentcompute/models/data_schemas.py
 from dataclasses import dataclass, field, asdict as dataclass_asdict
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from .enums import VendorType, ComputeCapability, PerformanceTier
+from .enums import VendorType, ComputeCapability, PerformanceTier # Keep existing imports
 
+# --- New Data Schemas for Environment Detection ---
+@dataclass
+class FrameworkDependency:
+    """Represents a dependency of an ML framework."""
+    name: str                   # e.g., "CUDA", "cuDNN", "Python" (if framework implies a specific sub-range)
+    version: Optional[str] = None
+    path: Optional[str] = None  # e.g., path to CUDA toolkit if found
+    notes: Optional[str] = None # e.g., "Used at build time", "Dynamically linked"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return dataclass_asdict(self)
+
+@dataclass
+class FrameworkInfo:
+    """Information about a detected ML framework."""
+    name: str                           # e.g., "TensorFlow", "PyTorch", "JAX"
+    version: Optional[str] = None
+    path: Optional[str] = None          # Path to the imported module
+    dependencies: List[FrameworkDependency] = field(default_factory=list)
+    details: Dict[str, Any] = field(default_factory=dict) # For extra info, e.g., {"is_built_with_cuda": True}
+
+    def to_dict(self) -> Dict[str, Any]:
+        data = dataclass_asdict(self)
+        data['dependencies'] = [dep.to_dict() for dep in self.dependencies]
+        return data
+
+@dataclass
+class PythonEnvironmentInfo:
+    """Information about the Python environment."""
+    type: str                           # e.g., "conda", "venv", "system"
+    name: Optional[str] = None          # e.g., conda environment name
+    path: Optional[str] = None          # Path to the environment prefix or Python executable
+    python_version: str
+    frameworks: List[FrameworkInfo] = field(default_factory=list)
+
+    def to_dict(self) -> Dict[str, Any]:
+        data = dataclass_asdict(self)
+        data['frameworks'] = [fw.to_dict() for fw in self.frameworks]
+        return data
+
+# --- Existing Data Schemas ---
 @dataclass
 class TelemetryData:
     """Real-time hardware telemetry"""
@@ -85,13 +127,17 @@ class GPUInfo:
     cloud_region: Optional[str] = None # Cloud specific
     spot_price: Optional[float] = None # Cloud specific (if fetchable)
 
+    # Added to store environment info later, can be an empty dict initially
+    detected_environment: Dict[str, Any] = field(default_factory=dict) 
+
     def to_dict(self) -> Dict[str, Any]:
         data = dataclass_asdict(self)
         data['vendor'] = self.vendor.value
-        data['performance_tier'] = self.performance_tier.name
+        data['performance_tier'] = self.performance_tier.name # Use .name for enum string value
         data['supported_apis'] = [api.value for api in self.supported_apis]
         if self.benchmark_results:
             data['benchmark_results'] = self.benchmark_results.to_dict()
         
         data['telemetry_history'] = [th.to_dict() for th in self.telemetry_history]
+        # detected_environment will already be a dict from PythonEnvironmentInfo.to_dict()
         return data
