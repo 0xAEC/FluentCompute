@@ -1,1 +1,17 @@
-
+{
+  "gpu_cores_map": {
+    "m3 max chip with 16-core cpu and 40-core gpu": 40, "m3 max 40c gpu": 40,
+    "m3 max chip with 14-core cpu and 30-core gpu": 30, "m3 max 30c gpu": 30,
+    "m3 pro chip with 12-core cpu and 18-core gpu": 18, "m3 pro 18c gpu": 18,
+    "m3 pro chip with 11-core cpu and 14-core gpu": 14, "m3 pro 14c gpu": 14,
+    "m3 chip with 8-core cpu and 10-core gpu": 10, "m3 10c gpu": 10,
+    "m3 chip with 8-core cpu and 8-core gpu": 8, "m3 8c gpu": 8,
+    "m2 ultra": 76, "m2 max": 38, "m2 pro": 19, "m2": 10,
+    "m1 ultra": 64, "m1 max": 32, "m1 pro": 16, "m1": 8
+  },
+  "memory_bandwidth_map": {
+    "m3 max": 400.0, "m3 pro": 150.0, "m3": 100.0,
+    "m2 ultra": 800.0, "m2 max": 400.0, "m2 pro": 200.0, "m2": 100.0,
+    "m1 ultra": 800.0, "m1 max": 400.0, "m1 pro": 200.0, "m1": 68.25
+  }
+}
