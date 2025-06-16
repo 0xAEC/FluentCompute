@@ -1,1 +1,45 @@
-
+{
+  "bandwidth_map": {
+    "RX 7900 XTX": 960.0, "RX 7900 XT": 800.0, "RX 7800 XT": 624.0, "RX 7700 XT": 432.0,
+    "RX 6950 XT": 576.0, "RX 6900 XT": 512.0, "RX 6800 XT": 512.0, "RX 6800": 512.0, "RX 6700 XT": 384.0, "RX 6600 XT": 256.0,
+    "MI300X": 5200.0, "MI250X": 3200.0, "MI210": 1600.0, "MI100": 1228.0,
+    "Radeon VII": 1024.0, "Vega 64": 483.8, "Vega 56": 409.6
+  },
+  "memory_map": {
+    "RX 7900 XTX": 24576, "RX 7900 XT": 20480, "RX 7800 XT": 16384, "RX 7700 XT": 12288,
+    "RX 6950 XT": 16384, "RX 6900 XT": 16384, "RX 6800 XT": 16384, "RX 6800": 16384, "RX 6700 XT": 12288, "RX 6600 XT": 8192,
+    "MI300X": 196608, "MI250X": 131072, "MI100": 32768,
+    "Radeon VII": 16384, "Vega 64": 8192, "Vega 56": 8192,
+    "Radeon Pro W": 16384
+  },
+  "gfx_arch_map_name": {
+    "mi300": "gfx94x", "mi2": "gfx90a", "mi100": "gfx908",
+    "rx 7900": "gfx110x", "rx 7800": "gfx110x", "rx 7700": "gfx110x", "navi31": "gfx110x", "navi32": "gfx110x", "navi33": "gfx110x",
+    "rx 69": "gfx103x", "rx 68": "gfx103x", "rx 67": "gfx103x", "rx 66": "gfx103x", "navi21": "gfx103x", "navi22": "gfx103x", "navi23": "gfx103x",
+    "rx 5700": "gfx101x", "rx 5600": "gfx101x", "rx 5500": "gfx101x", "navi10": "gfx101x", "navi12": "gfx101x", "navi14": "gfx101x",
+    "radeon vii": "gfx906", "vega 20": "gfx906", "vega 64": "gfx900", "vega 56": "gfx900",
+    "rx 580": "gfx803", "rx 570": "gfx803", "polaris": "gfx803"
+  },
+  "gfx_arch_map_id": {
+    "740f": "gfx94x", "740c": "gfx94x",
+    "738c": "gfx90a", "7460": "gfx90a", "7461": "gfx90a",
+    "7388": "gfx908",
+    "744c": "gfx1100", "7445": "gfx1101", "746a": "gfx1102",
+    "73bf": "gfx1030", "73a5": "gfx1030", "73df": "gfx1031", "73ef": "gfx1032",
+    "731f": "gfx1010",
+    "66a0": "gfx906", "687f": "gfx900",
+    "67df": "gfx803", "67ef": "gfx803"
+  },
+  "gfx_arch_id_prefix": {
+      "74": "gfx110x",
+      "73": "gfx103x",
+      "731": "gfx101x", "734": "gfx101x"
+  },
+  "cu_map": {
+    "RX 7900 XTX": 96, "RX 7900 XT": 84, "RX 7800 XT": 60, "RX 7700 XT": 54,
+    "RX 6950 XT": 80, "RX 6900 XT": 80, "RX 6800 XT": 72, "RX 6800": 60, "RX 6700 XT": 40, "RX 6600 XT": 32,
+    "MI300X": 304, "MI250X": 220, "MI100": 120,
+    "Radeon VII": 60, "Vega 64": 64, "Vega 56": 56,
+    "RX 580": 36
+  }
+}
