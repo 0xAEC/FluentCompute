@@ -1,1 +1,42 @@
-
+{
+  "aws": {
+    "instance_specs": {
+      "p3.2xlarge": {"name": "NVIDIA Tesla V100", "memory_mb": 16384, "compute_capability": "7.0", "num_gpus": 1, "cuda_cores": 5120, "vendor": "NVIDIA", "supported_apis": ["cuda"]},
+      "p3.8xlarge": {"name": "NVIDIA Tesla V100", "memory_mb": 16384, "compute_capability": "7.0", "num_gpus": 4, "cuda_cores": 5120, "vendor": "NVIDIA", "supported_apis": ["cuda"]},
+      "p3.16xlarge": {"name": "NVIDIA Tesla V100", "memory_mb": 16384, "compute_capability": "7.0", "num_gpus": 8, "cuda_cores": 5120, "vendor": "NVIDIA", "supported_apis": ["cuda"]},
+      "g4dn.xlarge": {"name": "NVIDIA T4", "memory_mb": 16384, "compute_capability": "7.5", "num_gpus": 1, "cuda_cores": 2560, "vendor": "NVIDIA", "supported_apis": ["cuda"]},
+      "g5.xlarge": {"name": "NVIDIA A10G", "memory_mb": 24576, "compute_capability": "8.6", "num_gpus": 1, "cuda_cores": 9216, "vendor": "NVIDIA", "supported_apis": ["cuda"]},
+      "p4d.24xlarge": {"name": "NVIDIA A100 40GB", "memory_mb": 40960, "compute_capability": "8.0", "num_gpus": 8, "cuda_cores": 6912, "vendor": "NVIDIA", "supported_apis": ["cuda"]},
+      "p4de.24xlarge": {"name": "NVIDIA A100 80GB", "memory_mb": 81920, "compute_capability": "8.0", "num_gpus": 8, "cuda_cores": 6912, "vendor": "NVIDIA", "supported_apis": ["cuda"]},
+      "p5.48xlarge": {"name": "NVIDIA H100", "memory_mb": 81920, "compute_capability": "9.0", "num_gpus": 8, "cuda_cores": 14592, "vendor": "NVIDIA", "supported_apis": ["cuda"]},
+      "g4ad.xlarge": {"name": "AMD Radeon Pro V520", "memory_mb": 8192, "compute_capability": "gfx1011 (Navi 12)", "num_gpus": 1, "rocm_cus": 36, "vendor": "AMD", "supported_apis": ["rocm", "opencl"]},
+      "dl1.24xlarge": {"name": "Habana Gaudi", "memory_mb": 32768, "compute_capability": "Intel Gaudi", "num_gpus": 8, "vendor":"INTEL", "supported_apis": []},
+      "trn1.2xlarge": {"name": "AWS Trainium", "memory_mb": 32768, "compute_capability": "AWS Trainium", "num_gpus": 1, "vendor":"AWS", "supported_apis":[]}
+    }
+  },
+  "gcp": {
+    "gpu_type_specs": {
+      "nvidia-tesla-v100": {"name": "NVIDIA Tesla V100", "memory_mb": 16384, "compute_capability": "7.0", "cuda_cores": 5120, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "nvidia-tesla-t4": {"name": "NVIDIA T4", "memory_mb": 16384, "compute_capability": "7.5", "cuda_cores": 2560, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "nvidia-tesla-a100": {"name": "NVIDIA A100 40GB", "memory_mb": 40960, "compute_capability": "8.0", "cuda_cores": 6912, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "nvidia-a100-80gb": {"name": "NVIDIA A100 80GB", "memory_mb": 81920, "compute_capability": "8.0", "cuda_cores": 6912, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "nvidia-l4": {"name": "NVIDIA L4", "memory_mb": 24576, "compute_capability": "8.9", "cuda_cores": 7424, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "nvidia-h100-80gb": {"name": "NVIDIA H100 80GB", "memory_mb": 81920, "compute_capability": "9.0", "cuda_cores": 14592, "vendor":"NVIDIA", "supported_apis": ["cuda"]}
+    }
+  },
+  "azure": {
+    "vm_size_specs": {
+      "Standard_NC6s_v3": {"name": "NVIDIA Tesla V100", "memory_mb": 16384, "compute_capability": "7.0", "cuda_cores": 5120, "num_gpus": 1, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_NC12s_v3": {"name": "NVIDIA Tesla V100", "memory_mb": 16384, "compute_capability": "7.0", "cuda_cores": 5120, "num_gpus": 2, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_NC24s_v3": {"name": "NVIDIA Tesla V100", "memory_mb": 16384, "compute_capability": "7.0", "cuda_cores": 5120, "num_gpus": 4, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_NC24rs_v3": {"name": "NVIDIA Tesla V100", "memory_mb": 16384, "compute_capability": "7.0", "cuda_cores": 5120, "num_gpus": 4, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_NC4as_T4_v3": {"name": "NVIDIA T4", "memory_mb": 16384, "compute_capability": "7.5", "cuda_cores": 2560, "num_gpus": 1, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_ND96asr_v4": {"name": "NVIDIA A100 40GB", "memory_mb": 40960, "compute_capability": "8.0", "cuda_cores": 6912, "num_gpus": 8, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_ND96amsr_A100_v4": {"name": "NVIDIA A100 80GB", "memory_mb": 81920, "compute_capability": "8.0", "cuda_cores": 6912, "num_gpus": 8, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_NV6ads_A10_v5": {"name": "NVIDIA A10 (Partition)", "memory_mb": 4096, "compute_capability": "8.6", "cuda_cores": 1536, "num_gpus": 1, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_NV12ads_A10_v5": {"name": "NVIDIA A10 (Partition)", "memory_mb": 8192, "compute_capability": "8.6", "cuda_cores": 3072, "num_gpus": 1, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_ND96ix_H100_v5": {"name": "NVIDIA H100 80GB", "memory_mb": 81920, "compute_capability": "9.0", "cuda_cores": 14592, "num_gpus": 8, "vendor":"NVIDIA", "supported_apis": ["cuda"]},
+      "Standard_ND96Mi_v5": {"name": "AMD Instinct MI200", "memory_mb": 65536, "compute_capability": "gfx90a", "rocm_cus": 104, "num_gpus": 1, "vendor": "AMD", "supported_apis": ["rocm", "opencl"]}
+    }
+  }
+}
