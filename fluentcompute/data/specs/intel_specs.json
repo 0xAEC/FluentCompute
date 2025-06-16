@@ -1,1 +1,56 @@
-
+{
+  "name_refinement_device_id": {
+    "56a0": "Intel Arc A770 Graphics", "56a1": "Intel Arc A750 Graphics", "56a2": "Intel Arc A580 Graphics",
+    "56a5": "Intel Arc A380 Graphics", "56a6": "Intel Arc A380 Graphics", "56b0": "Intel Arc A380 Graphics", "56b1": "Intel Arc A380 Graphics",
+    "4905": "Intel Iris Xe MAX Graphics", "4907": "Intel Iris Xe MAX Graphics", "4c0c": "Intel Iris Xe MAX Graphics", "4c0d": "Intel Iris Xe MAX Graphics"
+  },
+  "name_refinement_device_id_prefix": {
+      "56": "Intel Arc Graphics", "0x56": "Intel Arc Graphics",
+      "9a": "Intel Iris Xe Graphics", "4c": "Intel Iris Xe Graphics", "a7": "Intel Iris Xe Graphics",
+      "19": "Intel Graphics Gen9", "59": "Intel Graphics Gen9", "3e": "Intel Graphics Gen9"
+  },
+  "name_refinement_raw_name_contains": {
+      "Arc": null, "Iris Xe MAX": null, "Iris Xe": null, "UHD Graphics": null, "HD Graphics": null
+  },
+  "memory_bandwidth_map": {
+    "arc a770": 560.0, "arc a750": 512.0, "arc a580": 512.0, "arc a380": 186.0,
+    "iris xe max": 68.25, "dg1": 68.25,
+    "data center gpu max 1550": 4096.0, "data center gpu max 1100": 2048.0
+  },
+  "igpu_memory_bandwidth_estimates": {
+      "lpddr5": 80.0, "lp5": 80.0, "lpddr4": 60.0, "lp4": 60.0,
+      "ddr5": 70.0, "ddr4": 45.0, "generic": 50.0
+  },
+  "memory_estimate_map": {
+    "arca77016gb": 16384, "arca770": 8192, "arca770m": 8192,
+    "arca750": 8192, "arca580": 8192, "arca380": 6144, "arca370m": 6144,
+    "arca350m": 4096, "arca310": 4096, "irisxemax": 4096, "dg1": 4096,
+    "datacentergpumax1550": 131072, "datacentergpumax1100": 49152
+  },
+  "gen_arch_name_map": {
+    "data center gpu max": "Xe-HPC (Ponte Vecchio)", "ponte vecchio": "Xe-HPC (Ponte Vecchio)",
+    "arc": "Xe-HPG (Alchemist)", "iris xe max": "Xe-LP (DG1)",
+    "iris xe graphics": "Xe-LP (iGPU)",
+    "uhd graphics": null, "hd graphics": null
+  },
+  "gen_arch_device_id_map": {
+    "56": "Xe-HPG (Alchemist)",
+    "4905": "Xe-LP (DG1)",
+    "9a": "Xe-LP (iGPU)", "4c8": "Xe-LP (iGPU)", "a7": "Xe-LP (iGPU)",
+    "3e9": "Gen9.5 (Kaby Lake/Coffee Lake)",
+    "19": "Gen9 (Skylake)", "59": "Gen9.5 (Kaby Lake/Coffee Lake)"
+  },
+  "eu_map_name": {
+    "arca770": 512, "arca750": 448, "arca580": 384,
+    "arca380": 128, "arca370m": 128, "arca350m": 96, "arca310": 96,
+    "irisxemax": 96
+  },
+  "eu_map_device_id": {
+      "4905": 96,
+      "9a49": 96, "9a7f": 48,
+      "4c8a": 32, "9bc5": 24, "3e92": 24
+  },
+  "server_eu_map": {
+      "datacentergpumax1550": 1024, "datacentergpumax1100": 384
+  }
+}
