@@ -1,7 +1,9 @@
 import asyncio
 import subprocess
 import re
-from typing import List, Optional
+import json # For loading specs
+from pathlib import Path # For loading specs
+from typing import List, Optional, Any, Dict
 from datetime import datetime
 
 from fluentcompute.models import GPUInfo, TelemetryData, VendorType, PerformanceTier, ComputeCapability
@@ -14,10 +16,26 @@ if PYNVML_AVAILABLE:
 
 class NvidiaDetector(HardwareDetector):
     """Advanced NVIDIA GPU detection with NVML integration"""
+    _SPEC_FILE_NAME = "nvidia_specs.json"
+
     def __init__(self):
         self.nvml_initialized = False
+        self.specs: Dict[str, Any] = self._load_specs()
         self._initialize_nvml()
     
+    def _load_specs(self) -> Dict[str, Any]:
+        try:
+            # Path: fluentcompute/detectors/nvidia_detector.py -> fluentcompute/data/specs/nvidia_specs.json
+            spec_path = Path(__file__).resolve().parent.parent / "data" / "specs" / self._SPEC_FILE_NAME
+            if not spec_path.exists():
+                logger.warning(f"NVIDIA spec file not found at {spec_path}. Using empty specs.")
+                return {}
+            with open(spec_path, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Failed to load NVIDIA specs from {self._SPEC_FILE_NAME}: {e}", exc_info=True)
+            return {}
+
     def _initialize_nvml(self):
         if PYNVML_AVAILABLE:
             try:
@@ -53,7 +71,6 @@ class NvidiaDetector(HardwareDetector):
 
     def _get_cuda_version_from_smi(self) -> Optional[str]:
         try:
-            # First, try to get CUDA version from nvidia-smi header
             smi_output = subprocess.check_output(['nvidia-smi'], text=True, timeout=5)
             match = re.search(r"CUDA Version:\s*([\d\.]+)", smi_output)
             if match:
@@ -188,7 +205,7 @@ class NvidiaDetector(HardwareDetector):
                     boost_clock=safe_int(parts[11]) if parts[11] != '[N/A]' else 0,
                     memory_clock=max_mem_clk,
                     performance_tier=self._determine_performance_tier(gpu_name),
-                    power_limit=safe_int(parts[8].replace('W','').strip()) if parts[8] != '[N/A]' else 0, # smi outputs power with W suffix
+                    power_limit=safe_int(parts[8].replace('W','').strip()) if parts[8] != '[N/A]' else 0,
                     temperature=safe_int(parts[9]) if parts[9] != '[N/A]' else 0, 
                     fan_speed=safe_int(parts[10].replace('%','').strip()) if parts[10] != '[N/A]' else 0,
                     driver_version=parts[7] if parts[7] != '[N/A]' else "",
@@ -206,7 +223,7 @@ class NvidiaDetector(HardwareDetector):
         if not self.nvml_initialized:
             try:
                 query_items = 'utilization.gpu,utilization.memory,temperature.gpu,power.draw,fan.speed,clocks.current.graphics,clocks.current.memory'
-                id_selector = gpu.pci_bus_id if gpu.pci_bus_id and gpu.pci_bus_id.lower() != "unknown" and gpu.pci_bus_id.lower() != "n/a (apple silicon)" and gpu.pci_bus_id.lower() != "n/a (cloud)" else str(gpu.gpu_index)
+                id_selector = gpu.pci_bus_id if gpu.pci_bus_id and gpu.pci_bus_id.lower() != "unknown" and gpu.pci_bus_id.lower() not in ["n/a (apple silicon)", "n/a (cloud)"] else str(gpu.gpu_index)
 
                 cmd = [
                     'nvidia-smi', f'--query-gpu={query_items}',
@@ -236,11 +253,11 @@ class NvidiaDetector(HardwareDetector):
                     )
             except Exception as e:
                 logger.debug(f"nvidia-smi telemetry fallback for {gpu.name} failed: {e}")
-            return TelemetryData(datetime.now(), 0, 0, float(gpu.temperature), 0)
+            return TelemetryData(datetime.now(), 0, 0, float(gpu.temperature or 0.0), 0) # Added or 0.0 for gpu.temperature
 
         try:
             handle = pynvml.nvmlDeviceGetHandleByPciBusId(gpu.pci_bus_id.encode('utf-8')) \
-                if gpu.pci_bus_id and gpu.pci_bus_id.lower() != "unknown" and gpu.pci_bus_id.lower() != "n/a (apple silicon)" and gpu.pci_bus_id.lower() != "n/a (cloud)" \
+                if gpu.pci_bus_id and gpu.pci_bus_id.lower() != "unknown" and gpu.pci_bus_id.lower() not in ["n/a (apple silicon)", "n/a (cloud)"] \
                 else pynvml.nvmlDeviceGetHandleByIndex(gpu.gpu_index)
 
             util = pynvml.nvmlDeviceGetUtilizationRates(handle)
@@ -282,76 +299,44 @@ class NvidiaDetector(HardwareDetector):
             logger.error(f"❌ NVML telemetry failed for GPU {gpu.name} (idx {gpu.gpu_index}, pci {gpu.pci_bus_id}): {e}")
         except Exception as e:
             logger.error(f"❌ Unexpected telemetry error for GPU {gpu.name}: {e}")
-        return TelemetryData(datetime.now(), 0, 0, float(gpu.temperature), 0.0)
+        return TelemetryData(datetime.now(), 0, 0, float(gpu.temperature or 0.0), 0.0) # Added or 0.0
 
     def _calculate_memory_bandwidth(self, gpu_name: str, mem_clk_mhz: Optional[int] = None) -> float:
-        bandwidth_map = { 
-            'RTX 4090': 1008.0, 'RTX 4080': 716.8, 'RTX 4070 Ti SUPER': 672.3, 'RTX 4070 Ti': 504.2, 'RTX 4070 SUPER': 716.8, 'RTX 4070': 504.2,
-            'RTX 3090 Ti': 1008.0, 'RTX 3090': 936.2, 'RTX 3080 Ti': 912.4, 'RTX 3080': 760.3, 'RTX 3070 Ti': 608.3, 'RTX 3070': 448.0,
-            'A100': 1555.0, 'H100 SXM': 3350.0, 'H100 PCIe': 2000.0, 'V100': 900.0, 'T4': 320.0, 'A10G': 600.0, 'A10': 600.0, 'A40': 696.0, 'A6000': 768.0,
-            'NVIDIA RTX 6000 Ada Generation': 960.0, 'NVIDIA RTX A6000': 768.0,
-        }
+        bandwidth_map = self.specs.get("bandwidth_map", {})
         for model, bandwidth in bandwidth_map.items():
             if model in gpu_name: return bandwidth
         
+        # Fallback calculation if not in map (simplified)
         if mem_clk_mhz and mem_clk_mhz > 0:
-            bus_width_bits = 384 
+            bus_width_bits = 384 # Default guess
             if any(n in gpu_name for n in ['4070', '3070', 'Tesla T4', 'A10G']): bus_width_bits = 256
             elif any(n in gpu_name for n in ['4060', '3060']): bus_width_bits = 192
-            elif any(n in gpu_name for n in ['Tesla V100']): bus_width_bits = 4096 # HBM2
-            elif any(n in gpu_name for n in ['A100']): bus_width_bits = 5120 if "SXM" in gpu_name else 5120 # HBM2e, some sources use 6144 for 80GB
+            elif any(n in gpu_name for n in ['Tesla V100']): bus_width_bits = 4096 
+            elif any(n in gpu_name for n in ['A100']): bus_width_bits = 5120
             
-            # This calculation is simplified. Different memory types (GDDR vs HBM) have different multipliers.
-            # Assuming mem_clk_mhz from NVML is effective data rate / 2 for GDDR. HBM is different.
-            multiplier = 2 # For GDDR type cards
+            multiplier = 2 
             if "HBM" in gpu_name or any(x in gpu_name for x in ["V100", "A100", "H100"]):
-                 multiplier = 1 # HBM clocks are often reported differently (actual physical clock)
-                 # Example: V100, 877 MHz memory clock (actual) * 4096-bit bus / 8 bits/byte = 448 GB/s (half of advertised 900)
-                 # The 900 GB/s is (actual_clock * 2 (DDR)) * bus_width_bits / 8 / 1000
-                 # For V100 NVML max mem clock seems to be data rate / 2
-            
-            # Check NVIDIA product pages for the clock value interpretation. Often, NVML GetMaxClockInfo is memory chip's clock.
-            # E.g. RTX 3080 mem_clk (from NVML max) is around 9500 MHz (which is 19 Gbps / 2). Bandwidth = 9500 * 2 * 320 / 8 / 1000 = 760.
-            # So, the (mem_clk_mhz * 2 * bus_width_bits) / 8000 formula generally holds for GDDR if mem_clk_mhz is half data rate.
-            
-            # If 'Tesla V100' or 'A100' etc, the map above is more reliable. This is a fallback.
+                 multiplier = 1
             return (float(mem_clk_mhz) * multiplier * bus_width_bits) / 8.0 / 1000.0
-
         return 0.0
 
     def _get_cuda_cores(self, gpu_name: str) -> Optional[int]:
-        cuda_cores_map = {
-            'RTX 4090': 16384, 'RTX 4080 SUPER': 10240, 'RTX 4080': 9728, 'RTX 4070 Ti SUPER': 8448, 'RTX 4070 Ti': 7680, 'RTX 4070 SUPER': 7168, 'RTX 4070': 5888, 'RTX 4060 Ti': 4352, 'RTX 4060': 3072,
-            'RTX 3090 Ti': 10752, 'RTX 3090': 10496, 'RTX 3080 Ti': 10240, 'RTX 3080': 8704,
-            'RTX 3070 Ti': 6144, 'RTX 3070': 5888, 'RTX 3060 Ti': 4864, 'RTX 3060': 3584,
-            'NVIDIA A100': 6912, 'NVIDIA H100': 14592, 'Tesla V100': 5120, 'Tesla T4': 2560, 'A10G': 9728, 'NVIDIA A10': 9216, 'NVIDIA A40': 10752, 'NVIDIA RTX A6000': 10752,
-            'NVIDIA RTX 6000 Ada Generation': 18176, 'NVIDIA RTX 5000 Ada Generation': 12800, 'NVIDIA RTX 4000 Ada Generation': 6144
-        }
-        for model_key in cuda_cores_map: # Check for NVIDIA prefix as well
+        cuda_cores_map = self.specs.get("cuda_cores_map", {})
+        for model_key in cuda_cores_map:
             if model_key in gpu_name or model_key.replace("NVIDIA ", "") in gpu_name:
                  return cuda_cores_map[model_key]
         return None
 
     def _get_rt_cores(self, gpu_name: str) -> Optional[int]:
-        rt_cores_map = { 
-            'RTX 4090': 128, 'RTX 4080': 76, 'RTX 4070 Ti': 60, 'RTX 4070': 46,
-            'RTX 3090': 82, 'RTX 3080': 68, 'RTX 3070': 46,
-            'NVIDIA A40': 84, 'NVIDIA RTX A6000': 84, 'NVIDIA RTX 6000 Ada Generation': 142
-        } 
+        rt_cores_map = self.specs.get("rt_cores_map", {})
         for model_key in rt_cores_map:
             if model_key in gpu_name or model_key.replace("NVIDIA ", "") in gpu_name:
                  return rt_cores_map[model_key]
-        if "Tesla" in gpu_name or "A100" in gpu_name or "H100" in gpu_name or "V100" in gpu_name: return None # No dedicated RT cores
+        if "Tesla" in gpu_name or "A100" in gpu_name or "H100" in gpu_name or "V100" in gpu_name: return None
         return None
 
     def _get_tensor_cores(self, gpu_name: str) -> Optional[int]:
-        tensor_cores_map = {
-            'RTX 4090': 512, 'RTX 4080': 304, 'RTX 4070 Ti': 240, 'RTX 4070': 184, 
-            'RTX 3090': 328, 'RTX 3080': 272, 'RTX 3070': 184, 
-            'NVIDIA A100': 432, 'NVIDIA H100': 456, 'Tesla V100': 640, 
-            'Tesla T4': 320, 
-            'NVIDIA A40': 336, 'NVIDIA RTX A6000': 336, 'NVIDIA RTX 6000 Ada Generation': 568
-        }
+        tensor_cores_map = self.specs.get("tensor_cores_map", {})
         for model_key in tensor_cores_map:
             if model_key in gpu_name or model_key.replace("NVIDIA ", "") in gpu_name:
                  return tensor_cores_map[model_key]
@@ -359,6 +344,7 @@ class NvidiaDetector(HardwareDetector):
     
     def _determine_performance_tier(self, gpu_name: str) -> PerformanceTier:
         name_upper = gpu_name.upper().replace("NVIDIA ", "")
+        # This logic could be further externalized, but for now, lists are hardcoded.
         if any(card in name_upper for card in ['H100', 'A100', 'MI300', 'MI250', 'RTX 6000 ADA', 'A6000', 'RTX A6000', 'GV100', 'TESLA V100']): return PerformanceTier.ENTERPRISE
         if any(card in name_upper for card in ['RTX 4090', 'RTX 3090', 'RX 7900 XTX', 'RX 6950 XT', 'RX 6900 XT', 'RTX A5000', 'RTX 5000 ADA']): return PerformanceTier.PROFESSIONAL
         if any(card in name_upper for card in ['RTX 4080', 'RTX 3080 TI', 'RTX 3080', 'RX 7900 XT', 'RX 6800 XT', 'RTX 4070 TI', 'ARC A770']): return PerformanceTier.ENTHUSIAST
@@ -368,15 +354,15 @@ class NvidiaDetector(HardwareDetector):
         return PerformanceTier.UNKNOWN
 
     def _check_virtualization_support(self, gpu_name: str) -> bool:
-        # Normalize name for checks
         name_check = gpu_name.replace("NVIDIA ", "")
-        vgpu_cards = ['A100', 'H100', 'A40', 'A30', 'A16', 'A10', 'A2', 
-                      'RTX A6000', 'RTX A5000', 'RTX A4000', # Added A4000
-                      'RTX 6000 Ada Generation', 'RTX 5000 Ada Generation', 'RTX 4000 Ada Generation', # Added Ada Prof line
-                      'L40', 'L4']
+        virtualization_spec = self.specs.get("virtualization_keywords", {})
+        vgpu_cards = virtualization_spec.get("vgpu_cards", [])
+        tesla_prefixes = virtualization_spec.get("tesla_prefixes", [])
+        grid_keyword = virtualization_spec.get("grid_keyword", "")
+
         if any(card in name_check for card in vgpu_cards): return True
-        if "TESLA M" in name_check or "TESLA P" in name_check or "TESLA V" in name_check : return True
-        if "GRID" in name_check: return True
+        if any(prefix in name_check for prefix in tesla_prefixes): return True
+        if grid_keyword and grid_keyword in name_check: return True # Ensure grid_keyword is not empty
         return False
 
     def cleanup(self):
